@@ -1,0 +1,27 @@
+{
+  "name": "systemjs-plugin-aurelia-view",
+  "version": "1.0.0",
+  "description": "SystemJS plugin for aurelia view and other related assets like css",
+  "main": "av.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ahmedshuhel/plugin-aurelia-view.git"
+  },
+  "keywords": [
+    "systemjs",
+    "plugin",
+    "aurelia",
+    "view",
+    "css",
+    "html"
+  ],
+  "author": "Shuhel Ahmed <Shuhel Ahmed>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ahmedshuhel/plugin-aurelia-view/issues"
+  },
+  "homepage": "https://github.com/ahmedshuhel/plugin-aurelia-view#readme"
+}
