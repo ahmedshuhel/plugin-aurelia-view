@@ -11,19 +11,23 @@ function escape(source) {
 }
 
 function getBuilder(loader) {
-  return loader['import']('./css-builder' + (System.version ? '.js' : ''), {
+  return loader['import']('./view-builder' + (System.version ? '.js' : ''), {
     name: module.id
   });
 }
 
-exports.cssPlugin = true;
+exports.AureliaViewPlugin = true;
 
 exports.fetch = function(load) {
-  // individually mark loads as not built for buildCSS false
-  if (this.buildCSS === false)
+  
+  // individually mark loads as not built for buildView false
+  if (this.buildView === false){
     load.metadata.build = false;
+  }
+  
   // setting format = 'defined' means we're managing our own output
   load.metadata.format = 'defined';
+  
   // don't load the CSS at all until build time
   return '';
 };
@@ -32,8 +36,11 @@ exports.instantiate = function() {};
 
 exports.bundle = function(loads, opts) {
   var loader = this;
-  if (loader.buildCSS === false)
+
+  if (loader.buildView === false){
     return '';
+  }
+
   return getBuilder(loader).then(function(builder) {
     return builder.bundle.call(loader, loads, opts);
   });
@@ -47,7 +54,7 @@ exports.listAssets = function(loads, compileOpts, outputOpts) {
   });
 };
 
-exports.translate = function() {
+exports.translate = function(load) {
   load.metadata.format = 'amd';
   return 'def' + 'ine(function() {\nreturn "' + escape(load.source) + '";\n});';
 }
