@@ -10,51 +10,56 @@ function escape(source) {
     .replace(/[\u2029]/g, "\\u2029");
 }
 
-function getBuilder(loader) {
-  return loader['import']('./view-builder' + (System.version ? '.js' : ''), {
-    name: module.id
-  });
-}
+if (typeof window === 'undefined') {
 
-exports.AureliaViewPlugin = true;
-
-exports.fetch = function(load) {
-  
-  // individually mark loads as not built for buildView false
-  if (this.buildView === false){
-    load.metadata.build = false;
+  function getBuilder(loader) {
+    return loader['import']('./view-builder.js', {
+      name: module.id
+    });
   }
-  
-  // setting format = 'defined' means we're managing our own output
-  load.metadata.format = 'defined';
-  
-  // don't load the CSS at all until build time
-  return '';
-};
 
-exports.instantiate = function() {};
+  exports.AureliaViewPlugin = true;
 
-exports.bundle = function(loads, opts) {
-  var loader = this;
-
-  if (loader.buildView === false){
+  /*
+  exports.fetch = function(load) {
+    
+    // individually mark loads as not built for buildView false
+    if (this.buildView === false){
+      load.metadata.build = false;
+    }
+    
+    // setting format = 'defined' means we're managing our own output
+    load.metadata.format = 'defined';
+    
+    // don't load the CSS at all until build time
     return '';
+  };
+  */
+
+  exports.instantiate = function() {};
+
+  exports.bundle = function(loads, opts) {
+    var loader = this;
+    if (loader.buildView === false) {
+      return '';
+    }
+
+    return getBuilder(loader).then(function(builder) {
+      return builder.bundle.call(loader, loads, opts);
+    });
+  };
+
+  exports.listAssets = function(loads, compileOpts, outputOpts) {
+    var loader = this;
+
+    return getBuilder(loader).then(function(builder) {
+      return builder.listAssets.call(loader, loads, compileOpts, outputOpts);
+    });
+  };
+
+} else {
+  exports.translate = function(load) {
+    load.metadata.format = 'amd';
+    return 'def' + 'ine(function() {\nreturn "' + escape(load.source) + '";\n});';
   }
-
-  return getBuilder(loader).then(function(builder) {
-    return builder.bundle.call(loader, loads, opts);
-  });
-};
-
-exports.listAssets = function(loads, compileOpts, outputOpts) {
-  var loader = this;
-
-  return getBuilder(loader).then(function(builder) {
-    return builder.listAssets.call(loader, loads, compileOpts, outputOpts);
-  });
-};
-
-exports.translate = function(load) {
-  load.metadata.format = 'amd';
-  return 'def' + 'ine(function() {\nreturn "' + escape(load.source) + '";\n});';
 }

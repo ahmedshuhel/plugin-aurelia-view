@@ -37,7 +37,7 @@ exports.listAssets = function(loads, compileOpts, outputOpts) {
   });
 };
 
-
+/*
 function getCleanCSSOptions(cssOptimize, outputOpts, outFile, rootURL) {
   return {
     advanced: cssOptimize,
@@ -52,15 +52,13 @@ function getCleanCSSOptions(cssOptimize, outputOpts, outFile, rootURL) {
     sourceMapInlineSources: outputOpts.sourceMapContents
   };
 }
+*/
 
-function createStubDefines(writeStubs, loads, compileOpts) {
-  if (!writeStubs) {
-    return [];
-  }
 
+function createStubDefines(loads, compileOpts) {
   return loads.map(function(load) {
     return (compileOpts.systemGlobal || 'System') + ".register('" + load.name + "', [], false, function() {});";
-  }).join('\n')
+  }).join('\n');
 }
 
 exports.bundle = function(loads, compileOpts, outputOpts) {
@@ -69,37 +67,34 @@ exports.bundle = function(loads, compileOpts, outputOpts) {
   return loader['import']('html-minifier')
     .then(function(minifier) {
 
-      // SystemJS Builder 0.14 will write the stubs for use, we detect by the 3 argument over 2 argument bundle call
-      var writeStubs = typeof outputOpts == 'undefined';
-      outputOpts = outputOpts || compileOpts;
+      var stubDefines = createStubDefines(loads, compileOpts);
 
-      var stubDefines = createStubDefines(writeStubs, loads, compileOpts);
-      var rootURL = loader.rootURL || fromFileURL(loader.baseURL);
-      var cssOptimize = outputOpts.minify && outputOpts.cssOptimize !== false;
+var strVar="";
+strVar += "<template>";
+strVar += "  <require from=\"nav-bar.html\"><\/require>";
+strVar += "  <require from=\"bootstrap\/css\/bootstrap.css\"><\/require>";
+strVar += "";
+strVar += "  <nav-bar router.bind=\"router\"><\/nav-bar>";
+strVar += "";
+strVar += "  <div class=\"page-host\">";
+strVar += "    <router-view><\/router-view>";
+strVar += "  <\/div>";
+strVar += "<\/template>";
+strVar += "";
 
       /*
-      var outFile = loader.separateCSS ? outputOpts.outFile.replace(/\.js$/, '.css') : rootURL;
-      var cleanCSS = new CleanCSS(getCleanCSSOptions(cssOptimize, outputOpts, outFile, rootURL)).minify(loads.map(function(load) {
-        return fromFileURL(load.address);
-      }));
-      if (cleanCSS.errors.length){
-        throw new Error('CSS Plugin:\n' + cleanCSS.errors.join('\n'));
-      }
-      var cssOutput = cleanCSS.styles;
-
+      loads.map(function(load){
+           load.metadata.format = 'amd';
+           load.source = 'def' + 'ine(function(){ return "' + escape(minifier.minify(load.source)) + '"; });
+      });
      */
 
-    var contents = loads.map(function(load){
-       return fs.readFileSync(fromFileURL(load.address), 'utf8');
-    });
-
-      console.log(contents);
-
-      return [stubDefines, '("' + escape(output) + '");'].join('\n');
+      return [stubDefines, '("' + escape(minifier.minify(strVar)) + '");'].join('\n');
     })
     .catch(function(err) {
       if (err.toString().indexOf('ENOENT') != -1) {
-        throw new Error('Install html-minifier via `jspm install npm:html-minifier --dev` for HTML/CSS build support. Set System.buildHTML = false to skip  builds.');
+        throw new Error(
+          'Install html-minifier via `jspm install npm:html-minifier --dev` for HTML/CSS build support. Set System.buildHTML = false to skip  builds.');
       }
       throw err;
     });
