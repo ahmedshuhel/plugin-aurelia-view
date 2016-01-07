@@ -32,11 +32,10 @@ if (typeof window === 'undefined') {
     load.metadata.format = 'defined';
     
     // don't load the CSS at all until build time
-    return '';
+    return load;
   };
-  */
 
-  exports.instantiate = function() {};
+ */
 
   exports.bundle = function(loads, opts) {
     var loader = this;

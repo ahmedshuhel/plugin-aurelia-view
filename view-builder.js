@@ -54,42 +54,22 @@ function getCleanCSSOptions(cssOptimize, outputOpts, outFile, rootURL) {
 }
 */
 
-
-function createStubDefines(loads, compileOpts) {
-  return loads.map(function(load) {
-    return (compileOpts.systemGlobal || 'System') + ".register('" + load.name + "', [], false, function() {});";
-  }).join('\n');
-}
+var minifyOpts = {
+  collapseWhitespace: true
+};
 
 exports.bundle = function(loads, compileOpts, outputOpts) {
   var loader = this;
 
   return loader['import']('html-minifier')
     .then(function(minifier) {
-
-      var stubDefines = createStubDefines(loads, compileOpts);
-
-var strVar="";
-strVar += "<template>";
-strVar += "  <require from=\"nav-bar.html\"><\/require>";
-strVar += "  <require from=\"bootstrap\/css\/bootstrap.css\"><\/require>";
-strVar += "";
-strVar += "  <nav-bar router.bind=\"router\"><\/nav-bar>";
-strVar += "";
-strVar += "  <div class=\"page-host\">";
-strVar += "    <router-view><\/router-view>";
-strVar += "  <\/div>";
-strVar += "<\/template>";
-strVar += "";
-
-      /*
-      loads.map(function(load){
-           load.metadata.format = 'amd';
-           load.source = 'def' + 'ine(function(){ return "' + escape(minifier.minify(load.source)) + '"; });
+      var bundle = loads.map(function(load) {
+        return "System.registerDynamic(['" + load.name + "'], true, function(require, exports, module) { " +
+          "module.exports = '" + escape(minifier.minify(load.source, minifyOpts)) + "';" +
+          " });"
       });
-     */
 
-      return [stubDefines, '("' + escape(minifier.minify(strVar)) + '");'].join('\n');
+      return bundle.join('\n');
     })
     .catch(function(err) {
       if (err.toString().indexOf('ENOENT') != -1) {
