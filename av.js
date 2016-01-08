@@ -20,22 +20,7 @@ if (typeof window === 'undefined') {
 
   exports.AureliaViewPlugin = true;
 
-  /*
-  exports.fetch = function(load) {
-    
-    // individually mark loads as not built for buildView false
-    if (this.buildView === false){
-      load.metadata.build = false;
-    }
-    
-    // setting format = 'defined' means we're managing our own output
-    load.metadata.format = 'defined';
-    
-    // don't load the CSS at all until build time
-    return load;
-  };
-
- */
+  exports.instantiate = function() {};
 
   exports.bundle = function(loads, opts) {
     var loader = this;

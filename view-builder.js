@@ -60,16 +60,18 @@ var minifyOpts = {
 
 exports.bundle = function(loads, compileOpts, outputOpts) {
   var loader = this;
-
   return loader['import']('html-minifier')
     .then(function(minifier) {
-      var bundle = loads.map(function(load) {
-        return "System.registerDynamic(['" + load.name + "'], true, function(require, exports, module) { " +
+
+      return loads.map(function(load) {
+
+        load.source = "System.registerDynamic(['" + load.name + "'], true, function(require, exports, module) { " +
           "module.exports = '" + escape(minifier.minify(load.source, minifyOpts)) + "';" +
           " });"
+
+        return load;
       });
 
-      return bundle.join('\n');
     })
     .catch(function(err) {
       if (err.toString().indexOf('ENOENT') != -1) {
